@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ParserCombinatorsFsharp.Parser", "ParserCombinatorsFsharp.Parser\ParserCombinatorsFsharp.Parser.fsproj", "{2FADC1B9-D4B4-4B00-AB21-16BC46363E0C}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ParserCombinatorsFsharp.Parser.Tests", "ParserCombinatorsFsharp.Parser.Tests\ParserCombinatorsFsharp.Parser.Tests.fsproj", "{6E75C42B-C52A-4AA2-945B-B9BD0C40A050}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2FADC1B9-D4B4-4B00-AB21-16BC46363E0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FADC1B9-D4B4-4B00-AB21-16BC46363E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FADC1B9-D4B4-4B00-AB21-16BC46363E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FADC1B9-D4B4-4B00-AB21-16BC46363E0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E75C42B-C52A-4AA2-945B-B9BD0C40A050}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E75C42B-C52A-4AA2-945B-B9BD0C40A050}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E75C42B-C52A-4AA2-945B-B9BD0C40A050}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E75C42B-C52A-4AA2-945B-B9BD0C40A050}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
