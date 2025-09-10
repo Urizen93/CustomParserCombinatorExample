@@ -3,13 +3,16 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <RootNamespace>ParserCombinatorsFsharp</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Helpers.fs" />
+        <Compile Include="Keyword.fs" />
         <Compile Include="Types.fs" />
-        <Compile Include="Parser.fs" />
+        <Compile Include="LanguageParser.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ParserCombinatorsFsharp.Parser\ParserCombinatorsFsharp.Parser.fsproj" />
     </ItemGroup>
 
 </Project>

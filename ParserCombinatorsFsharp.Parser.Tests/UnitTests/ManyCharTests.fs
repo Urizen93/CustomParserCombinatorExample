@@ -1,6 +1,7 @@
 namespace ParserCombinatorsFsharp.Tests
 
 module ManyCharTests =
+    open FsUnit
     open Xunit
     open ParserCombinatorsFsharp.Parser
     
@@ -30,11 +31,11 @@ module ManyCharTests =
     
     [<Fact>]
     let ``many1Char should short-circuit on non-consuming parsers`` () =
-        "123456789"
-        |> runOnString (many1Char ((fun _ -> '1') <!> nonConsumingParser))
-        |> assertFail
+        fun () -> "123456789" |> runOnString (many1Char (nonConsumingParser |>> fun _ -> '1')) |> ignore
+        |> should throw typeof<System.Exception>
     
     [<Theory;
+      InlineData ("x", "x");
       InlineData ("a123", "a123");
       InlineData ("w654a3", "w654");>]
     let ``many1Char2 should parse until fails`` input (expected : string) =
@@ -60,14 +61,13 @@ module ManyCharTests =
     
     [<Fact>]
     let ``many1Char2 should short-circuit if p2 is a non-consuming parser`` () =
-        "123456789"
-        |> runOnString (many1Char2 isDigit ((fun _ -> '1') <!> nonConsumingParser))
-        |> assertFail
+        fun () -> "123456789" |> runOnString (many1Char2 isDigit (nonConsumingParser |>> fun _ -> '1')) |> ignore
+        |> should throw typeof<System.Exception>
     
     [<Fact>]
     let ``many1Char2 should behave correctly if p1 is a non-consuming parser`` () =
         let input = "123456789"
         let ch = '1'
         input
-        |> runOnString (many1Char2 ((fun _ -> ch) <!> nonConsumingParser) isDigit)
+        |> runOnString (many1Char2 (nonConsumingParser |>> fun _ -> ch) isDigit)
         |> assertSuccess ($"{ch}" + input)

@@ -8,7 +8,7 @@ module BetweenTests =
       InlineData ("{123}", "123");>]
     let ``between should return the results of the last parser`` input expected =
         input
-        |> runOnString (between (exact "{") (exact "}") (many1Char isDigit))
+        |> runOnString (between %'{' %'}' (many1Char isDigit))
         |> assertSuccess expected
     
     [<Theory;
@@ -16,7 +16,7 @@ module BetweenTests =
       InlineData ("{123}1qwe", "1qwe");>]
     let ``between should consume the input it parsed`` input expected =
         input
-        |> runOnString (between (exact "{") (exact "}") (many1Char isDigit))
+        |> runOnString (between %'{' %'}' (many1Char isDigit))
         |> assertRemainingInput expected
     
     [<Theory;
@@ -26,5 +26,5 @@ module BetweenTests =
       InlineData "{}";>]
     let ``between should fail if any of the parsers fail`` input =
         input
-        |> runOnString (between (exact "{") (exact "}") (many1Char isDigit))
+        |> runOnString (between %'{' %'}' (many1Char isDigit))
         |> assertFail

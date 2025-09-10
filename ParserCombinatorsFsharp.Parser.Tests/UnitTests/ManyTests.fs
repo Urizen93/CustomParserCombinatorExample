@@ -1,6 +1,7 @@
 ﻿namespace ParserCombinatorsFsharp.Tests
 
 module ManyTests =
+    open FsUnit
     open Xunit
     open ParserCombinatorsFsharp.Parser
     
@@ -24,9 +25,8 @@ module ManyTests =
     
     [<Fact>]
     let ``many should short-circuit on non-consuming parsers`` () =
-        "123456789"
-        |> runOnString (many nonConsumingParser)
-        |> assertFail
+        fun () -> "123456789" |> runOnString (many nonConsumingParser) |> ignore
+        |> should throw typeof<System.Exception>
     
     [<Theory;
       InlineData ("123", "123");
@@ -54,6 +54,5 @@ module ManyTests =
     
     [<Fact>]
     let ``many1 should short-circuit on non-consuming parsers`` () =
-        "123456789"
-        |> runOnString (many1 nonConsumingParser)
-        |> assertFail
+        fun () -> "123456789" |> runOnString (many1 nonConsumingParser) |> ignore
+        |> should throw typeof<System.Exception>

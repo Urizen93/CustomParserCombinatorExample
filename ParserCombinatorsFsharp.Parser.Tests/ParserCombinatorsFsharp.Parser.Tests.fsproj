@@ -4,7 +4,6 @@
         <TargetFramework>net9.0</TargetFramework>
         <IsPackable>false</IsPackable>
         <GenerateProgramFile>false</GenerateProgramFile>
-        <RootNamespace>ParserCombinatorsFsharp.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,11 +18,13 @@
         <Compile Include="UnitTests\ManyTests.fs" />
         <Compile Include="UnitTests\ManyCharTests.fs" />
         <Compile Include="UnitTests\SpacesTests.fs" />
+        <Compile Include="UnitTests\ManyCharTillTests.fs" />
         <Compile Include="UnitTests\BetweenTests.fs" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.2"/>
+        <PackageReference Include="FsUnit.xUnit" Version="7.1.1" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
         <PackageReference Include="xunit" Version="2.9.2"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2"/>
