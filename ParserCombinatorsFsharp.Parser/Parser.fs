@@ -9,14 +9,13 @@ module Parser =
     exception NonConsumingParsersAreNotAllowed
     exception NotExpectedToFail
     
-    let lift value = fun input -> Success <| { Value = value; RemainingInput = input }
+    let lift value input = Success <| { Value = value; RemainingInput = input }
     
-    let failInput (inputBasedError : Input -> string) = fun (input : Input) -> inputBasedError input |> Error |> Fail
+    let failInput (inputBasedError : Input -> string) (input : Input) = inputBasedError input |> Error |> Fail
     let fail error = failInput (fun _ -> error)
-    let map (f : 'a -> 'b) (parser : Parser<'a>) : Parser<'b> = fun input -> input |> parser |> Result.map f
+    let map (f : 'a -> 'b) (parser : Parser<'a>) input = input |> parser |> Result.map f
     let (|>>) parser f = map f parser
-    let join (parser : Parser<Parser<'a>>) : Parser<'a> =
-        fun input ->
+    let join (parser : Parser<Parser<'a>>) input =
         match input |> parser with
         | Success success -> success.Value <| success.RemainingInput
         | Fail error -> Fail error
@@ -24,25 +23,25 @@ module Parser =
     let (>>=) parser f : Parser<'b> = bind f parser
     let runOnString (parser : Parser<'a>) = Input.New >> parser
     
-    let exact (searchTerm : string) = fun (input : Input) ->
+    let exact (searchTerm : string) (input : Input) =
         match input.Rest.StartsWith searchTerm with
         | true -> Success <| { Value = (); RemainingInput = input.Consume(searchTerm.Length) }
         | false -> Result.fail $"'exact' expected {searchTerm} at position {input.CurrentPosition}: {input.Rest}"
     
-    let satisfy f = fun (input : Input) ->
+    let satisfy f (input : Input) =
         let rest = input.Rest
         if rest.Length > 0 && f rest[0] then
             Success <| { Value = rest[0]; RemainingInput = input.Consume(1) }
         else
-            Result.fail $"'satisfy' expected a specific character at {input.CurrentPosition}: {input.Rest}"
+            Result.fail $"'satisfy' expected a character at {input.CurrentPosition}: {input.Rest}"
     
-    let anyChar : Parser<char> = satisfy (fun _ -> true)
+    let anyChar : Parser<char> = satisfy <| fun _ -> true
     
     let exactChar : char -> Parser<char> = satisfy << (=)
     
     let (~%) = exactChar
     
-    let choice (parsers : Parser<'a> list) : Parser<'a> = fun (input : Input) -> 
+    let choice (parsers : Parser<'a> list) input =
         parsers
         |> List.tryPick (fun parser -> match parser input with
                                        | Success parsed -> Some <| Success parsed
@@ -63,7 +62,7 @@ module Parser =
         >>= fun result1 ->
             p2 |>> fun result2 -> (result1, result2)
     
-    let many (parser : Parser<'a>) : Parser<'a list> = fun (input : Input) ->
+    let many (parser : Parser<'a>) input =
         let mutable currentState = { Value = []; RemainingInput = input }
         let mutable shoudlContinue = true
         while shoudlContinue do
@@ -75,7 +74,7 @@ module Parser =
             | Fail _ -> shoudlContinue <- false
         Success { currentState with Value = List.rev currentState.Value }
     
-    let manyCharTill (parser : Parser<char>) (tillParser : Parser<'a>) = fun (input : Input) ->
+    let manyCharTill (parser : Parser<char>) (tillParser : Parser<'a>) input =
         let mutable currentState = { Value = []; RemainingInput = input }
         let mutable maybeError = None
         let mutable shoudlContinue = true
@@ -90,8 +89,8 @@ module Parser =
                     if currentState.RemainingInput.CurrentPosition <> success.RemainingInput.CurrentPosition
                     then currentState <- { Value = success.Value::currentState.Value; RemainingInput = success.RemainingInput }
                     else failwith "'manyCharsTill' does not support non-consuming parsers"
-                | Fail error ->
-                    maybeError <- Some error
+                | Fail (Error error) ->
+                    maybeError <- Some <| Error $"'manyCharsTill' failed: {error}"
                     shoudlContinue <- false
         Fail
         <!> maybeError
@@ -114,27 +113,33 @@ module Parser =
                many p2
                |>> fun result -> String.Join("", firstChar::result)
     
-    let spaces = fun input -> (many <| satisfy Char.IsWhiteSpace) |>> ignore <| input
-    let spaces1 = fun input -> (many1 <| satisfy Char.IsWhiteSpace) |>> ignore <| input
+    let spaces : Parser<unit>  = many <| satisfy Char.IsWhiteSpace |>> ignore
+    let spaces1 : Parser<unit> = many1 <| satisfy Char.IsWhiteSpace |>> ignore
+    let lineSpaces: Parser<unit> = many <| satisfy (fun ch -> Char.IsWhiteSpace ch && ch <> '\n') |>> ignore
+    let newLine : Parser<unit> = %'\n' |>> ignore
+    let endOfInput : Parser<unit> = fun (input : Input) ->
+        if input.IsAtTheEnd
+        then Success <| { Value = (); RemainingInput = input }
+        else Fail <| Error $"Symbols remain at position {input.CurrentPosition}: {input.Rest}" 
+    let endOfLine : Parser<unit> = manyCharTill (satisfy Char.IsWhiteSpace) (newLine <|> endOfInput) |>> ignore
     
     let between (pOpen : Parser<'a>) (pClose : Parser<'b>) (parser : Parser<'c>) : Parser<'c> =
         pOpen
         >>= fun _ -> parser
         >>= fun result -> pClose |>> (fun _ -> result)
             
-    let optionallyEndsWith (ending : Parser<'b>) (parser : Parser<'a>) : Parser<'a> =
-        fun (input : Input) ->
-            let matchEnding result =
-                match ending result.RemainingInput with
-                | Success parsed -> { result with RemainingInput = parsed.RemainingInput }
-                | Fail _ -> result
-            match parser input with
-            | Success parsed -> Success <| matchEnding parsed
-            | Fail error -> Fail error
+    let optionallyEndsWith (ending : Parser<'b>) (parser : Parser<'a>) input =
+        let matchEnding result =
+            match ending result.RemainingInput with
+            | Success parsed -> { result with RemainingInput = parsed.RemainingInput }
+            | Fail _ -> result
+        match parser input with
+        | Success parsed -> Success <| matchEnding parsed
+        | Fail error -> Fail error
     
     let sepBy (separator : Parser<'b>) (parser : Parser<'a>) : Parser<'a list> =
         parser |> optionallyEndsWith separator |> many
     
     let isDigit = satisfy Char.IsDigit
     let isLetter = satisfy Char.IsLetter
-    let isAlphanumeric = fun input -> isDigit <|> isLetter <| input
+    let isAlphanumeric : Parser<char> = isDigit <|> isLetter

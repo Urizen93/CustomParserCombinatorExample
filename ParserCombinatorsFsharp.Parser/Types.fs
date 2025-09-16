@@ -1,13 +1,17 @@
 ﻿namespace ParserCombinatorsFsharp
 
+open System
+
 type Input private (value : string, position : int) =
     member private this.Value = value
     member this.CurrentPosition = position
+    member this.IsAtTheEnd = String.IsNullOrWhiteSpace this.Rest
     
     static member New value = Input (value, 0)
     
     member this.Rest = this.Value.Substring this.CurrentPosition
     member this.Consume n = Input (value, position + n)
+    override this.ToString() = this.Rest
 
 type Error = | Error of string
 

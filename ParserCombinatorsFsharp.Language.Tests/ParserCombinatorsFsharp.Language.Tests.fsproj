@@ -15,7 +15,9 @@
 
     <ItemGroup>
       <Compile Include="UnitTests\StringLiteralTests.fs" />
-      <Compile Include="UnitTests\RecordDeclarationTests.fs" />
+      <Compile Include="UnitTests\RecordDefinitionTests.fs" />
+      <Compile Include="UnitTests\RecordConstructorTests.fs" />
+      <Compile Include="UnitTests\LanguageConstructsTests.fs" />
     </ItemGroup>
 
     <ItemGroup>
