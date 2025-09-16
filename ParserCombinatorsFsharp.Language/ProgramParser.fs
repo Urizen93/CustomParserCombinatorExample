@@ -5,6 +5,7 @@ open ParserCombinatorsFsharp.Parser
 
 module ProgramParser =
     open LanguageParser
+    open NonEmptyList
     
     let compileTimeType : Parser<CompileTimeType> =
         spaces >>.
@@ -44,7 +45,7 @@ module ProgramParser =
         .>> spaces
         
     let languageConstruct : Parser<LanguageConstruct> = (statement |>> Statement) <|> (expression |>> Expression)
-    let program : Parser<LanguageConstruct list> = many1 languageConstruct
+    let program : Parser<LanguageConstruct NonEmptyList> = many1 languageConstruct
     
     let constant : Parser<LanguageExpression> = intLiteral <|> stringLiteral <|> unitLiteral |>> Constant
     let variable : Parser<LanguageExpression> = identifier |>> Variable
@@ -64,14 +65,21 @@ module ProgramParser =
     let propertyAccess : Parser<LanguageExpression> = identifier .>> dot .>>. identifier |>> PropertyAccess
     let list : Parser<LanguageExpression> = bracketOpen >>. many expression .>> bracketClose |>> List
     
+    let functionalParameter : Parser<FunctionParameter> =
+        identifier |>> Inferred
+        <|> (parenOpen >>. identifier .>> colon .>>. compileTimeType .>> parenClose |>> Implicit)
+    let functionalParameters : Parser<FunctionParameters> =
+        (unitLiteral |>> fun _ -> FunctionParameters.None)
+        <|> (many1 functionalParameter |>> Parameters)
+    
     // TODO we also must count indentation for lambdas - or introduce an ending keyword
     let lambda : Parser<LanguageExpression> =
-        funKeyword >>. many1 identifier .>> spaces .>> arrow .>>. many1 languageConstruct
-        >>= fun (identifiers, constructs) ->
+        funKeyword >>. functionalParameters .>> spaces .>> arrow .>>. many1 languageConstruct
+        >>= fun (parameters, NonEmpty constructs) ->
             match List.last constructs with
             | Expression expression ->
                 let constructsExceptLast = constructs |> List.removeAt (constructs.Length - 1)
-                lift <| Lambda (identifiers, constructsExceptLast, expression)
+                lift <| Lambda (parameters, constructsExceptLast, expression)
             | Statement statement ->
                 failInput <| fun input -> $"Last construct in a lambda has to be an expression;
                                             found {statement} at position {input.CurrentPosition}: {input.Rest}"

@@ -2,6 +2,7 @@ namespace ParserCombinatorsFsharp.Language
 
 open System
 open System.Text.RegularExpressions
+open ParserCombinatorsFsharp
 
 type Identifier = private | Identifier of string with
     static member create (str : string) =
@@ -23,6 +24,14 @@ type CompileTimeType =
     | Integer
     | String
     | Custom of Identifier
+
+type FunctionParameter =
+    | Inferred of Identifier
+    | Implicit of Identifier * CompileTimeType
+
+type FunctionParameters =
+    | None
+    | Parameters of FunctionParameter NonEmptyList
 
 // I allow empty records just for the sake of simplicity
 type RecordDefinition = Identifier * Map<Identifier, CompileTimeType>
@@ -51,7 +60,7 @@ and LanguageExpression =
     | PropertyAccess of Identifier * Identifier
     | List of LanguageExpression list
     // For the sake of simplicity, let's allow function to have no arguments and pretend it's () in this case
-    | Lambda of Identifier list * LanguageConstruct list * LanguageExpression
+    | Lambda of FunctionParameters * LanguageConstruct list * LanguageExpression
 
 and LanguageConstruct =
     | Statement of LanguageStatement

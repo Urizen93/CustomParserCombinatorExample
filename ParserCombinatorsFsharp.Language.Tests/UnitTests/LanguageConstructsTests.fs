@@ -5,16 +5,19 @@ open ParserCombinatorsFsharp.Language
 open ParserCombinatorsFsharp.Language.ProgramParser
 open Xunit
 open ParserCombinatorsFsharp.Parser
+open NonEmptyList
 
 type ``program parser tests`` (output : ITestOutputHelper) =
     
     [<Theory; ClassData(typeof<Programs>)>]
-    member _.``Should parse a sample program`` (input, expected : LanguageConstruct list)=
+    member _.``Should parse a program`` (input, expected : LanguageConstruct list)=
         match input |> runOnString program with
-        | Success parsed -> Assert.Equal<LanguageConstruct> (expected, parsed.Value)
+        | Success parsed ->
+            let (NonEmpty actual) = parsed.Value
+            Assert.Equal<LanguageConstruct> (expected, actual)
         | Fail (Error fail) -> output.WriteLine fail
 
-and Programs () as this =
+and Programs() as this =
     inherit TheoryData<string, LanguageConstruct list>()
     do
         this.Add("
@@ -61,7 +64,7 @@ and Programs () as this =
           (Assignment
              (Identifier.create "customerZipCodeLens",
               Lambda
-                ([Identifier.create "customer"],
+                (Parameters (create [Inferred <| Identifier.create "customer"]),
                  [Statement
                     (Assignment
                        (Identifier.create "customerAddress",

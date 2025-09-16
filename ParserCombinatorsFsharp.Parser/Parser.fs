@@ -2,6 +2,7 @@
 
 open System
 open Helpers
+open NonEmptyList
 
 type Parser<'a> = Input -> Result<'a>
 
@@ -99,14 +100,14 @@ module Parser =
     
     let manyCharBetween2 boundary chars = boundary >>. manyCharTill chars boundary
         
-    let many1 (parser : Parser<'a>) : Parser<'a list> =
+    let many1 (parser : Parser<'a>) : Parser<'a NonEmptyList> =
         many parser >>= function
                         | [] -> failInput (fun input -> $"'many1' expected a parser to work at least once at {input.CurrentPosition}: {input.Rest}")
-                        | x -> lift <| x
+                        | x::xs -> lift <| NonEmptyList (x, xs)
     
     let many1Char (parser : Parser<char>) : Parser<string> =
         many1 parser
-        |>> fun result -> String.Join("", result)
+        |>> fun (NonEmpty result) -> String.Join("", result)
 
     let many1Char2 (p1 : Parser<char>) (p2 : Parser<char>) : Parser<string> =
         p1 >>= fun firstChar ->

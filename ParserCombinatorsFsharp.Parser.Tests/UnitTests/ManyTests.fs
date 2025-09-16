@@ -1,5 +1,7 @@
 ﻿namespace ParserCombinatorsFsharp.Tests
 
+open ParserCombinatorsFsharp
+
 module ManyTests =
     open FsUnit
     open Xunit
@@ -34,7 +36,7 @@ module ManyTests =
     let ``many1 should parse until fails`` input (expected : string) =
         input
         |> runOnString (many1 isDigit)
-        |> assertSuccess (expected.ToCharArray() |> List.ofArray)
+        |> assertSuccess (expected.ToCharArray() |> List.ofArray |> NonEmptyList.create)
     
     [<Theory;
       InlineData ("123", "");
