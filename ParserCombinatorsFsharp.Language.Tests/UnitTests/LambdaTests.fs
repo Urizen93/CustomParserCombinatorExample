@@ -21,6 +21,16 @@ and Lambdas() as this =
         this.Add("fun () -> 1", Lambda (None, [], Constant <| Literal.Integer 1))
         this.Add("fun x -> x", Lambda (Parameters <| create [Inferred <| Identifier.create "x"], [], Variable <| Identifier.create "x"))
         this.Add(
+            "fun (x : string) f (i : int) -> i",
+            Lambda (
+                Parameters <| create [
+                    Implicit <| (Identifier.create "x", String)
+                    Inferred <| Identifier.create "f"
+                    Implicit <| (Identifier.create "i", Integer)
+                ],
+                [],
+                Variable <| Identifier.create "i"))
+        this.Add(
             "fun (person : Customer) ->
                         let name = person.Name
                         name",
