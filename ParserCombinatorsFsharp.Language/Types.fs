@@ -59,7 +59,6 @@ and LanguageExpression =
     | RecordConstructor of Map<Identifier, LanguageExpression>
     | PropertyAccess of Identifier * Identifier
     | List of LanguageExpression list
-    // For the sake of simplicity, let's allow function to have no arguments and pretend it's () in this case
     | Lambda of FunctionParameters * LanguageConstruct list * LanguageExpression
 
 and LanguageConstruct =
