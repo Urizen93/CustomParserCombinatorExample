@@ -29,12 +29,10 @@ module Parser =
         | true -> Success <| { Value = (); RemainingInput = input.Consume(searchTerm.Length) }
         | false -> Result.fail $"'exact' expected {searchTerm} at position {input.CurrentPosition}: {input.Rest}"
     
-    let satisfy f (input : Input) =
-        let rest = input.Rest
-        if rest.Length > 0 && f rest[0] then
-            Success <| { Value = rest[0]; RemainingInput = input.Consume(1) }
-        else
-            Result.fail $"'satisfy' expected a character at {input.CurrentPosition}: {input.Rest}"
+    let satisfy predicate (input : Input) =
+        match input.Next with
+        | Some nextChar when predicate nextChar ->  Success <| { Value = nextChar; RemainingInput = input.Consume(1) }
+        | _ -> Result.fail $"'satisfy' expected a character at {input.CurrentPosition}: {input.Rest}"
     
     let anyChar : Parser<char> = satisfy <| fun _ -> true
     

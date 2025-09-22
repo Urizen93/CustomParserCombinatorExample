@@ -10,6 +10,9 @@ type Input private (value : string, position : int) =
     static member New value = Input (value, 0)
     
     member this.Rest = this.Value.Substring this.CurrentPosition
+    member this.Next = if this.CurrentPosition < this.Value.Length
+                                 then Some <| this.Value[this.CurrentPosition]
+                                 else None
     member this.Consume n = Input (value, position + n)
     override this.ToString() = this.Rest
 
