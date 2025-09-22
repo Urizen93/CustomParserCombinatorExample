@@ -2,21 +2,40 @@
 
 open System
 
-type Input private (value : string, position : int) =
-    member private this.Value = value
-    member this.CurrentPosition = position
-    member this.IsAtTheEnd = String.IsNullOrWhiteSpace this.Rest
-    
-    static member New value = Input (value, 0)
-    
-    member this.Rest = this.Value.Substring this.CurrentPosition
-    member this.Next = if this.CurrentPosition < this.Value.Length
-                                 then Some <| this.Value[this.CurrentPosition]
-                                 else None
-    member this.Consume n = Input (value, position + n)
-    override this.ToString() = this.Rest
+type Input =
+    abstract member CurrentPosition : int
+    abstract member IsAtTheEnd : bool
+    abstract member Next : char ValueOption
+    abstract member ReadNext: int -> string
+    abstract member Consume : int -> Input
+    abstract member Sample : string
 
-type Error = | Error of string
+type StringInput private (value : string, position : int) =
+    [<Literal>]
+    let SampleSize = 30
+    member private this.Value = value
+    static member New value = StringInput (value, 0)
+    override this.ToString() = this.Value
+    
+    interface Input with
+        member this.CurrentPosition = position
+        member this.IsAtTheEnd = this.Value.Length = (this :> Input).CurrentPosition
+        member this.Next =
+            let currentPosition = (this :> Input).CurrentPosition
+            if currentPosition < this.Value.Length
+            then ValueSome <| this.Value[currentPosition]
+            else ValueNone
+        member this.ReadNext n =
+            let currentPosition = (this :> Input).CurrentPosition
+            let remainingSymbols = this.Value.Length - currentPosition
+            this.Value.Substring (currentPosition, Math.Min(remainingSymbols, n))
+        member this.Consume n = StringInput (value, position + n)
+        member this.Sample = (this :> Input).ReadNext SampleSize
+    
+
+type Error = { Message : string; Input : Input } with
+    member this.Prepend (prefix : string) = { this with Message = prefix + this.Message }
+    override this.ToString () = $"{this.Message} at position {this.Input.CurrentPosition}: {this.Input.Sample}..."
 
 type Parsed<'a> = {
     Value : 'a
@@ -36,5 +55,3 @@ module Result =
     let map f = function
         | Success success -> success |> Parsed.map f |> Success
         | Fail error -> Fail error
-    
-    let fail value = Error value |> Fail

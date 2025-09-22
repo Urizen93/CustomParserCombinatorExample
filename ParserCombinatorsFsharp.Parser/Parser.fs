@@ -12,8 +12,7 @@ module Parser =
     
     let lift value input = Success <| { Value = value; RemainingInput = input }
     
-    let failInput (inputBasedError : Input -> string) (input : Input) = inputBasedError input |> Error |> Fail
-    let fail error = failInput (fun _ -> error)
+    let fail (message : string) (input : Input) = Fail { Message = message; Input = input }
     let map (f : 'a -> 'b) (parser : Parser<'a>) input = input |> parser |> Result.map f
     let (|>>) parser f = map f parser
     let join (parser : Parser<Parser<'a>>) input =
@@ -22,17 +21,17 @@ module Parser =
         | Fail error -> Fail error
     let bind (f : 'a -> Parser<'b>) (parser : Parser<'a>) : Parser<'b> = (parser |> map f) |> join
     let (>>=) parser f : Parser<'b> = bind f parser
-    let runOnString (parser : Parser<'a>) = Input.New >> parser
+    let runOnString (parser : Parser<'a>) = StringInput.New >> parser
     
     let exact (searchTerm : string) (input : Input) =
-        match input.Rest.StartsWith searchTerm with
+        match searchTerm = input.ReadNext searchTerm.Length with
         | true -> Success <| { Value = (); RemainingInput = input.Consume(searchTerm.Length) }
-        | false -> Result.fail $"'exact' expected {searchTerm} at position {input.CurrentPosition}: {input.Rest}"
+        | false -> fail $"'exact' expected {searchTerm}" input
     
     let satisfy predicate (input : Input) =
         match input.Next with
-        | Some nextChar when predicate nextChar ->  Success <| { Value = nextChar; RemainingInput = input.Consume(1) }
-        | _ -> Result.fail $"'satisfy' expected a character at {input.CurrentPosition}: {input.Rest}"
+        | ValueSome nextChar when predicate nextChar ->  Success <| { Value = nextChar; RemainingInput = input.Consume(1) }
+        | _ -> fail "'satisfy' expected a specific character" input
     
     let anyChar : Parser<char> = satisfy <| fun _ -> true
     
@@ -45,7 +44,7 @@ module Parser =
         |> List.tryPick (fun parser -> match parser input with
                                        | Success parsed -> Some <| Success parsed
                                        | Fail _ -> None)
-        |> Option.defaultValue (Result.fail $"'choice' expected at least one of the parsers to work at {input.CurrentPosition}: {input.Rest}")
+        |> Option.defaultValue (fail "'choice' expected at least one of the parsers to work" input)
     
     let (<|>) p1 p2 : Parser<'a> = choice [p1; p2]
     
@@ -88,8 +87,8 @@ module Parser =
                     if currentState.RemainingInput.CurrentPosition <> success.RemainingInput.CurrentPosition
                     then currentState <- { Value = success.Value::currentState.Value; RemainingInput = success.RemainingInput }
                     else failwith "'manyCharsTill' does not support non-consuming parsers"
-                | Fail (Error error) ->
-                    maybeError <- Some <| Error $"'manyCharsTill' failed: {error}"
+                | Fail error ->
+                    maybeError <- Some <| error.Prepend "'manyCharsTill' failed: "
                     shoudlContinue <- false
         Fail
         <!> maybeError
@@ -100,7 +99,7 @@ module Parser =
         
     let many1 (parser : Parser<'a>) : Parser<'a NonEmptyList> =
         many parser >>= function
-                        | [] -> failInput (fun input -> $"'many1' expected a parser to work at least once at {input.CurrentPosition}: {input.Rest}")
+                        | [] -> fail "'many1' expected a parser to work at least once"
                         | x::xs -> lift <| NonEmptyList (x, xs)
     
     let many1Char (parser : Parser<char>) : Parser<string> =
@@ -119,7 +118,7 @@ module Parser =
     let endOfInput : Parser<unit> = fun (input : Input) ->
         if input.IsAtTheEnd
         then Success <| { Value = (); RemainingInput = input }
-        else Fail <| Error $"Symbols remain at position {input.CurrentPosition}: {input.Rest}" 
+        else fail "End of input is expected yet symbols still remain" input
     let endOfLine : Parser<unit> = manyCharTill (satisfy Char.IsWhiteSpace) (newLine <|> endOfInput) |>> ignore
     
     let between (pOpen : Parser<'a>) (pClose : Parser<'b>) (parser : Parser<'c>) : Parser<'c> =

@@ -15,7 +15,7 @@ type ``program parser tests`` (output : ITestOutputHelper) =
         | Success parsed ->
             let (NonEmpty actual) = parsed.Value
             Assert.Equal<LanguageConstruct> (expected, actual)
-        | Fail (Error fail) -> output.WriteLine fail
+        | Fail fail -> output.WriteLine <| fail.ToString ()
 
 and Programs() as this =
     inherit TheoryData<string, LanguageConstruct list>()

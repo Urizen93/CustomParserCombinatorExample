@@ -29,7 +29,7 @@ module ProgramParser =
                 let result = Map.ofList fields
                 if result.Count = fields.Length
                 then lift result
-                else failInput <| fun input -> $"Duplicate record fields are not allowed at position {input.CurrentPosition}: {input.Rest}"
+                else fail "Duplicate record fields are not allowed"
     let recordDefinition : Parser<LanguageStatement> = typeName .>>. recordFieldsDefinition |>> (RecordDefinition >> TypeDefinition)
     
     let expression, expressionRef = createParserForwardedToRef ()
@@ -59,7 +59,7 @@ module ProgramParser =
                 let result = Map.ofList fields
                 if result.Count = fields.Length
                 then lift result
-                else failInput <| fun input -> $"Duplicate record field assignments are not allowed at position {input.CurrentPosition}: {input.Rest}"
+                else fail "Duplicate record field assignments are not allowed"
         |>> RecordConstructor
     
     let propertyAccess : Parser<LanguageExpression> = identifier .>> dot .>>. identifier |>> PropertyAccess
@@ -74,15 +74,13 @@ module ProgramParser =
     
     // TODO we also must count indentation for lambdas - or introduce an ending keyword
     let lambda : Parser<LanguageExpression> =
-        funKeyword >>. functionalParameters .>> spaces .>> arrow .>>. many1 languageConstruct
+        funKeyword >>. spaces1 >>. functionalParameters .>> spaces .>> arrow .>>. many1 languageConstruct
         >>= fun (parameters, NonEmpty constructs) ->
             match List.last constructs with
             | Expression expression ->
                 let constructsExceptLast = constructs |> List.removeAt (constructs.Length - 1)
                 lift <| Lambda (parameters, constructsExceptLast, expression)
-            | Statement statement ->
-                failInput <| fun input -> $"Last construct in a lambda has to be an expression;
-                                            found {statement} at position {input.CurrentPosition}: {input.Rest}"
+            | Statement statement -> fail $"Last construct in a lambda has to be an expression; found {statement}"
     
     do expressionRef.Value <-
         lineSpaces
