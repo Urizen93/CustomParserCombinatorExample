@@ -21,9 +21,10 @@ and Lambdas() as this =
     inherit TheoryData<string, LanguageExpression>()
     do
         this.Add("fun () -> 1", Lambda (Parameters <| create [UnitLiteral], [], Constant <| Literal.Integer 1))
+        this.Add("fun () () () -> 1", Lambda (Parameters <| create [UnitLiteral; UnitLiteral; UnitLiteral], [], Constant <| Literal.Integer 1))
         this.Add("fun x -> x", Lambda (Parameters <| create [Inferred <| Identifier.create "x"], [], Variable <| Identifier.create "x"))
         this.Add(
-            "fun (x : string) f (i : int) -> i",
+            "fun (x : string) (i : int) f -> i",
             Lambda (
                 Parameters <| create [
                     Implicit <| (Identifier.create "x", String)

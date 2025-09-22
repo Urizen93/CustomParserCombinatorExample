@@ -69,6 +69,7 @@ module ProgramParser =
         unitLiteral |>> fun _ -> UnitLiteral
         <|> (identifier |>> Inferred)
         <|> (parenOpen >>. identifier .>> colon .>>. compileTimeType .>> parenClose |>> Implicit)
+        .>> spaces
     let functionalParameters : Parser<FunctionParameters> = many1 functionalParameter |>> Parameters
     
     // TODO we also must count indentation for lambdas - or introduce an ending keyword
