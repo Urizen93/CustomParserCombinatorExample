@@ -12,7 +12,7 @@ type ``lambda parser tests`` (output : ITestOutputHelper) =
     [<Theory; ClassData(typeof<Lambdas>)>]
     member _.``Should parse a lambda`` (input, expected : LanguageExpression)=
         match input |> runOnString lambda with
-        | Success parsed -> Assert.Equal (expected.ToString (), parsed.Value.ToString ())
+        | Success parsed -> Assert.Equal (expected, parsed.Value)
                             output.WriteLine <| parsed.Value.ToString ()
         | Fail fail -> let error = fail.ToString ()
                        Assert.Fail error
@@ -20,7 +20,7 @@ type ``lambda parser tests`` (output : ITestOutputHelper) =
 and Lambdas() as this =
     inherit TheoryData<string, LanguageExpression>()
     do
-        this.Add("fun () -> 1", Lambda (None, [], Constant <| Literal.Integer 1))
+        this.Add("fun () -> 1", Lambda (Parameters <| create [UnitLiteral], [], Constant <| Literal.Integer 1))
         this.Add("fun x -> x", Lambda (Parameters <| create [Inferred <| Identifier.create "x"], [], Variable <| Identifier.create "x"))
         this.Add(
             "fun (x : string) f (i : int) -> i",

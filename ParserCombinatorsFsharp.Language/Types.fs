@@ -26,12 +26,11 @@ type CompileTimeType =
     | Custom of Identifier
 
 type FunctionParameter =
+    | UnitLiteral
     | Inferred of Identifier
     | Implicit of Identifier * CompileTimeType
 
-type FunctionParameters =
-    | None
-    | Parameters of FunctionParameter NonEmptyList
+type FunctionParameters = | Parameters of FunctionParameter NonEmptyList
 
 // I allow empty records just for the sake of simplicity
 type RecordDefinition = Identifier * Map<Identifier, CompileTimeType>

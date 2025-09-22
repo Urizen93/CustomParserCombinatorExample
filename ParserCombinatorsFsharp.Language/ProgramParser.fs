@@ -66,11 +66,10 @@ module ProgramParser =
     let list : Parser<LanguageExpression> = bracketOpen >>. many expression .>> bracketClose |>> List
     
     let functionalParameter : Parser<FunctionParameter> =
-        identifier |>> Inferred
+        unitLiteral |>> fun _ -> UnitLiteral
+        <|> (identifier |>> Inferred)
         <|> (parenOpen >>. identifier .>> colon .>>. compileTimeType .>> parenClose |>> Implicit)
-    let functionalParameters : Parser<FunctionParameters> =
-        (unitLiteral |>> fun _ -> FunctionParameters.None)
-        <|> (many1 functionalParameter |>> Parameters)
+    let functionalParameters : Parser<FunctionParameters> = many1 functionalParameter |>> Parameters
     
     // TODO we also must count indentation for lambdas - or introduce an ending keyword
     let lambda : Parser<LanguageExpression> =
