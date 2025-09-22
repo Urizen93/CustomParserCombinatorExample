@@ -72,15 +72,13 @@ module ProgramParser =
         .>> spaces
     let functionalParameters : Parser<FunctionParameters> = many1 functionalParameter |>> Parameters
     
-    // TODO we also must count indentation for lambdas - or introduce an ending keyword
     let lambda : Parser<LanguageExpression> =
-        funKeyword >>. spaces1 >>. functionalParameters .>> spaces .>> arrow .>>. many1 languageConstruct
-        >>= fun (parameters, NonEmpty constructs) ->
-            match List.last constructs with
-            | Expression expression ->
-                let constructsExceptLast = constructs |> List.removeAt (constructs.Length - 1)
-                lift <| Lambda (parameters, constructsExceptLast, expression)
-            | Statement statement -> fail $"Last construct in a lambda has to be an expression; found {statement}"
+        funKeyword >>. spaces1
+        >>. functionalParameters .>> spaces
+        .>> arrow
+        .>>. many languageConstruct
+        .>> spaces .>> returnKeyword .>>. expression
+        >>= fun ((parameters, constructs), final) -> lift <| Lambda (parameters, constructs, final)
     
     do expressionRef.Value <-
         lineSpaces

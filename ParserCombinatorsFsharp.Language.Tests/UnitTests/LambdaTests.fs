@@ -20,11 +20,11 @@ type ``lambda parser tests`` (output : ITestOutputHelper) =
 and Lambdas() as this =
     inherit TheoryData<string, LanguageExpression>()
     do
-        this.Add("fun () -> 1", Lambda (Parameters <| create [UnitLiteral], [], Constant <| Literal.Integer 1))
-        this.Add("fun () () () -> 1", Lambda (Parameters <| create [UnitLiteral; UnitLiteral; UnitLiteral], [], Constant <| Literal.Integer 1))
-        this.Add("fun x -> x", Lambda (Parameters <| create [Inferred <| Identifier.create "x"], [], Variable <| Identifier.create "x"))
+        this.Add("fun () -> return 1", Lambda (Parameters <| create [UnitLiteral], [], Constant <| Literal.Integer 1))
+        this.Add("fun () () () -> return 1", Lambda (Parameters <| create [UnitLiteral; UnitLiteral; UnitLiteral], [], Constant <| Literal.Integer 1))
+        this.Add("fun x -> return x", Lambda (Parameters <| create [Inferred <| Identifier.create "x"], [], Variable <| Identifier.create "x"))
         this.Add(
-            "fun (x : string) (i : int) f -> i",
+            "fun (x : string) f (i : int) -> return i",
             Lambda (
                 Parameters <| create [
                     Implicit <| (Identifier.create "x", String)
@@ -36,7 +36,7 @@ and Lambdas() as this =
         this.Add(
             "fun (person : Customer) ->
                         let name = person.Name
-                        name",
+                        return name",
             Lambda (
                 Parameters <| create [Implicit <| (Identifier.create "person", Custom <| Identifier.create "Customer")],
                 [Statement (Assignment <| (Identifier.create "name", PropertyAccess (Identifier.create "person", Identifier.create "Name")))],

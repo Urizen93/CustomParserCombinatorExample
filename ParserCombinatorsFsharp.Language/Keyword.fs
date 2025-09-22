@@ -12,6 +12,9 @@ module internal Keyword =
     let Fun = "fun"
     
     [<Literal>]
+    let Return = "return"
+    
+    [<Literal>]
     let Unit = "unit"
     
     [<Literal>]
@@ -22,4 +25,12 @@ module internal Keyword =
 
 [<RequireQualifiedAccess>]
 module internal Keywords =
-    let All = Set.ofList [Keyword.Type; Keyword.Let; Keyword.Fun; Keyword.Unit; Keyword.String; Keyword.Int]
+    let All = Set.ofList [
+        Keyword.Type
+        Keyword.Let
+        Keyword.Fun
+        Keyword.Return
+        Keyword.Unit
+        Keyword.String
+        Keyword.Int
+    ]

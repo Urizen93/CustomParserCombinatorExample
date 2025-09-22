@@ -33,7 +33,7 @@ and Programs() as this =
 
             let customerZipCodeLens = fun customer ->
                 let customerAddress = customer.Address
-                customerAddress.ZipCode",
+                return customerAddress.ZipCode",
         [Statement
           (TypeDefinition
              (RecordDefinition

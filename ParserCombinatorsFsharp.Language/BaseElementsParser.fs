@@ -37,6 +37,7 @@ module LanguageParser =
     let typeKeyword : Parser<unit> = exact Keyword.Type
     let letKeyword : Parser<unit> = exact Keyword.Let
     let funKeyword : Parser<unit> = exact Keyword.Fun
+    let returnKeyword : Parser<unit> = exact Keyword.Return
     let unitKeyword : Parser<unit> = exact Keyword.Unit
     let intKeyword : Parser<unit> = exact Keyword.Int
     let stringKeyword : Parser<unit> = exact Keyword.String
