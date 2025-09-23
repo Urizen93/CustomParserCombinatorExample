@@ -24,9 +24,17 @@ module Parser =
     let runOnString (parser : Parser<'a>) = StringInput.New >> parser
     
     let exact (searchTerm : string) (input : Input) =
-        match searchTerm = input.ReadNext searchTerm.Length with
-        | true -> Success <| { Value = (); RemainingInput = input.Consume(searchTerm.Length) }
-        | false -> fail $"'exact' expected {searchTerm}" input
+        let mutable result = true 
+        for i in 0..searchTerm.Length - 1 do
+            if result
+            then
+                match input.PeekForward i with
+                | ValueSome nextSymbol -> result <- nextSymbol = searchTerm[i]
+                | ValueNone -> result <- false
+            else ()
+        if result
+        then Success <| { Value = (); RemainingInput = input.Consume(searchTerm.Length) }
+        else fail $"'exact' expected {searchTerm}" input
     
     let satisfy predicate (input : Input) =
         match input.Next with

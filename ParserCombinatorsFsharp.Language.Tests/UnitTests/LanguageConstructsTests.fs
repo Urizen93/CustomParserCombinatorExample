@@ -10,7 +10,7 @@ open NonEmptyList
 type ``program parser tests`` (output : ITestOutputHelper) =
     
     [<Theory; ClassData(typeof<Programs>)>]
-    member _.``Should parse a program`` (input, expected : LanguageConstruct list)=
+    member _.``Should parse a program`` (input, expected : LanguageConstruct list) =
         match input |> runOnString program with
         | Success parsed ->
             let (NonEmpty actual) = parsed.Value
@@ -29,11 +29,11 @@ and Programs() as this =
                              Address = { Street = \"Marka Radovica\"
                                          ZipCode = 81000} }
 
-            [taras]
-
             let customerZipCodeLens = fun customer ->
                 let customerAddress = customer.Address
-                return customerAddress.ZipCode",
+                return customerAddress.ZipCode
+
+            [taras]",
         [Statement
           (TypeDefinition
              (RecordDefinition
@@ -57,9 +57,6 @@ and Programs() as this =
                           [(Identifier.create "Street", Constant (Literal.String "Marka Radovica"));
                            (Identifier.create "ZipCode", Constant (Literal.Integer 81000))]));
                     (Identifier.create "Name", Constant (Literal.String "Taras"))])))
-         Expression
-          (List
-            [(Variable (Identifier.create "taras"))])
          Statement
           (Assignment
              (Identifier.create "customerZipCodeLens",
@@ -69,4 +66,7 @@ and Programs() as this =
                     (Assignment
                        (Identifier.create "customerAddress",
                         PropertyAccess (Identifier.create "customer", Identifier.create "Address")))],
-                 PropertyAccess (Identifier.create "customerAddress", Identifier.create "ZipCode"))))])
+                 PropertyAccess (Identifier.create "customerAddress", Identifier.create "ZipCode"))))
+         Expression
+          (List
+             [(Variable (Identifier.create "taras"))])])

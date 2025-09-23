@@ -1,5 +1,6 @@
 ﻿namespace ParserCombinatorsFsharp.Tests
 
+open System
 open Microsoft.FSharp.Core
 open Xunit
 open ParserCombinatorsFsharp
@@ -14,8 +15,8 @@ module Assertions =
 
     let assertRemainingInput expected actual =
         match actual with
-        | Success { RemainingInput = actualRemainingInput } when expected = actualRemainingInput.ReadNext expected.Length -> ()
-        | Success { RemainingInput = actualRemainingInput } -> Assert.Fail $"Expected to have {expected} remaining, actually got {actualRemainingInput.Sample}"
+        | Success { RemainingInput = actualRemainingInput } when expected = actualRemainingInput.ReadNext Int32.MaxValue -> ()
+        | Success { RemainingInput = actualRemainingInput } -> Assert.Fail $"Expected to have {expected} remaining, actually got {actualRemainingInput.ReadNext}"
         | Fail error -> Assert.Fail $"Parser failed with {error}"
 
     let assertFail actual =
