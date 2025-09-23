@@ -149,3 +149,12 @@ module Parser =
     let isDigit = satisfy Char.IsDigit
     let isLetter = satisfy Char.IsLetter
     let isAlphanumeric : Parser<char> = isDigit <|> isLetter
+    
+    [<Sealed>]
+    type ParserBuilder () =
+        member _.Bind (x, f) = x >>= f
+        member _.Return x = lift x
+        member _.ReturnFrom x : Parser<'a> = x
+        member _.Delay f : Input -> Result<'a> = f ()
+    
+    let parse = ParserBuilder ()

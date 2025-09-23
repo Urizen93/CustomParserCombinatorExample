@@ -10,7 +10,7 @@ module NonEmptyList =
     let create list =
         match createOrNone list with
         | Some a -> a
-        | None -> failwith "List must be empty!"
+        | None -> failwith "List cannot be empty!"
     
     let (|NonEmpty|) (NonEmptyList (x, xs)) = x::xs
 

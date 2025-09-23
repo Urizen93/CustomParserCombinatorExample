@@ -10,6 +10,7 @@ type Input =
     abstract member ReadNext: int -> string
     abstract member Consume : int -> Input
 
+[<Sealed>]
 type StringInput private (value : string, position : int) =
     member private this.Value = value
     static member New value = StringInput (value, 0)

@@ -5,7 +5,6 @@ open ParserCombinatorsFsharp.Parser
 
 module ProgramParser =
     open LanguageParser
-    open NonEmptyList
     
     let compileTimeType : Parser<CompileTimeType> =
         spaces >>.
@@ -72,13 +71,23 @@ module ProgramParser =
         .>> spaces
     let functionalParameters : Parser<FunctionParameters> = many1 functionalParameter |>> Parameters
     
-    let lambda : Parser<LanguageExpression> =
+    let lambda1 : Parser<LanguageExpression> =
         funKeyword >>. spaces1
         >>. functionalParameters .>> spaces
         .>> arrow
         .>>. many languageConstruct
         .>> spaces .>> returnKeyword .>>. expression
         >>= fun ((parameters, constructs), final) -> lift <| Lambda (parameters, constructs, final)
+    
+    let lambda : Parser<LanguageExpression> = parse {
+        do! funKeyword >>. spaces1
+        let! parameters = functionalParameters
+        do! spaces >>. arrow
+        let! body = many languageConstruct
+        do! spaces >>. returnKeyword
+        let! final = expression
+        return Lambda (parameters, body, final)
+    }
     
     do expressionRef.Value <-
         lineSpaces
