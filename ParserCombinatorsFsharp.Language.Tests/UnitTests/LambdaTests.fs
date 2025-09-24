@@ -27,9 +27,9 @@ and Lambdas() as this =
             "fun (x : string) f (i : int) -> return i",
             Lambda (
                 Parameters <| create [
-                    Implicit <| (Identifier.create "x", String)
+                    Explicit <| (Identifier.create "x", String)
                     Inferred <| Identifier.create "f"
-                    Implicit <| (Identifier.create "i", Integer)
+                    Explicit <| (Identifier.create "i", Integer)
                 ],
                 [],
                 Variable <| Identifier.create "i"))
@@ -38,7 +38,7 @@ and Lambdas() as this =
                         let name = person.Name
                         return name",
             Lambda (
-                Parameters <| create [Implicit <| (Identifier.create "person", Custom <| Identifier.create "Customer")],
+                Parameters <| create [ Explicit <| (Identifier.create "person", Custom <| Identifier.create "Customer")],
                 [Statement (Assignment <| (Identifier.create "name", PropertyAccess (Identifier.create "person", Identifier.create "Name")))],
                 Variable <| Identifier.create "name")
         )

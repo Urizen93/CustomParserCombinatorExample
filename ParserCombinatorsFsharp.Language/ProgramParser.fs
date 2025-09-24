@@ -67,17 +67,9 @@ module ProgramParser =
     let functionalParameter : Parser<FunctionParameter> =
         unitLiteral |>> fun _ -> UnitLiteral
         <|> (identifier |>> Inferred)
-        <|> (parenOpen >>. identifier .>> colon .>>. compileTimeType .>> parenClose |>> Implicit)
+        <|> (parenOpen >>. identifier .>> colon .>>. compileTimeType .>> parenClose |>> Explicit)
         .>> spaces
     let functionalParameters : Parser<FunctionParameters> = many1 functionalParameter |>> Parameters
-    
-    let lambda1 : Parser<LanguageExpression> =
-        funKeyword >>. spaces1
-        >>. functionalParameters .>> spaces
-        .>> arrow
-        .>>. many languageConstruct
-        .>> spaces .>> returnKeyword .>>. expression
-        >>= fun ((parameters, constructs), final) -> lift <| Lambda (parameters, constructs, final)
     
     let lambda : Parser<LanguageExpression> = parse {
         do! funKeyword >>. spaces1

@@ -28,7 +28,7 @@ type CompileTimeType =
 type FunctionParameter =
     | UnitLiteral
     | Inferred of Identifier
-    | Implicit of Identifier * CompileTimeType
+    | Explicit of Identifier * CompileTimeType
 
 type FunctionParameters = | Parameters of FunctionParameter NonEmptyList
 
